@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>סל חכם – השוואת סל קניות</title>
+<meta name="description" content="השוואת מחירי סל הקניות שלך בין הסופרים באזור">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23116149'/%3E%3Cpath d='M8 11h17l-2 9H10z' fill='none' stroke='white' stroke-width='2.4' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='24' r='1.8' fill='white'/%3E%3Ccircle cx='21' cy='24' r='1.8' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">דלג לתוכן הראשי</a>
+
+<header class="top">
+  <div class="wrap top-row">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8"/><path d="M8 11h17l-2 9H10z"/><circle cx="12" cy="24" r="1.8"/><circle cx="21" cy="24" r="1.8"/></svg>
+      <div>
+        <h1>סל חכם</h1>
+        <p class="area" id="areaLine">טוען…</p>
+      </div>
+    </div>
+    <div class="a11y" role="group" aria-label="הגדרות תצוגה">
+      <button type="button" class="icon-btn" id="fontDown" aria-label="הקטן טקסט">א−</button>
+      <button type="button" class="icon-btn" id="fontUp" aria-label="הגדל טקסט">א+</button>
+      <button type="button" class="icon-btn" id="contrastBtn" aria-pressed="false" aria-label="ניגודיות גבוהה">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="themeBtn" aria-pressed="false" aria-label="מצב כהה">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="wrap tabs" aria-label="ניווט ראשי">
+    <button type="button" class="tab" data-view="basket" aria-current="page">הסל שלי</button>
+    <button type="button" class="tab" data-view="paste">הדבקת רשימה</button>
+    <button type="button" class="tab" data-view="watch">מעקב מחירים <span class="badge" id="alertBadge" hidden></span></button>
+    <button type="button" class="tab" data-view="settings">אזור והגדרות</button>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div id="firstRun" class="notice" role="status" hidden></div>
+</div>
+
+<main id="main" class="wrap" tabindex="-1">
+
+  <!-- ============ BASKET ============ -->
+  <section id="view-basket" class="view" aria-labelledby="h-basket">
+    <h2 id="h-basket" class="sr-only">הסל שלי</h2>
+
+    <div class="card">
+      <label for="searchInput" class="label-lg">הוספת מוצר לסל</label>
+      <p class="hint" id="searchHint">הקלד שם מוצר או ברקוד. חצים למעלה ולמטה לבחירה, Enter להוספה.</p>
+      <div class="search">
+        <input id="searchInput" type="search" autocomplete="off" inputmode="search"
+               role="combobox" aria-expanded="false" aria-controls="searchList" aria-autocomplete="list"
+               aria-describedby="searchHint" placeholder="לדוגמה: חלב 3%, לחם, ביצים">
+        <ul id="searchList" class="results" role="listbox" aria-label="תוצאות חיפוש" hidden></ul>
+      </div>
+      <p id="searchStatus" class="sr-only" aria-live="polite"></p>
+    </div>
+
+    <div class="card">
+      <div class="row-between">
+        <h3 id="basketTitle">הסל שלי <span class="muted" id="basketCount"></span></h3>
+        <div class="saved">
+          <label for="savedSelect" class="sr-only">סלים שמורים</label>
+          <select id="savedSelect"><option value="">סלים שמורים…</option></select>
+          <button type="button" class="btn ghost" id="saveBasket">שמור סל</button>
+          <button type="button" class="btn ghost" id="shareBasket">שתף סל</button>
+        </div>
+      </div>
+      <p class="empty" id="basketEmpty">הסל ריק. חפש מוצרים למעלה, או הדבק רשימה שלמה בלשונית "הדבקת רשימה".</p>
+      <ul id="basketList" class="basket" aria-labelledby="basketTitle"></ul>
+      <div class="row-between actions" id="basketActions" hidden>
+        <button type="button" class="btn ghost danger" id="clearBasket">רוקן סל</button>
+        <button type="button" class="btn primary big" id="compareBtn">השווה מחירים</button>
+      </div>
+    </div>
+
+    <section id="results" class="card" aria-labelledby="h-results" hidden>
+      <div class="row-between">
+        <h3 id="h-results">איפה הכי זול</h3>
+        <label class="switch">
+          <input type="checkbox" id="clubToggle">
+          <span>כולל מבצעי מועדון</span>
+        </label>
+      </div>
+      <div id="summary" class="summary" role="status" aria-live="polite"></div>
+      <ol id="storeList" class="stores"></ol>
+      <p class="fine">המחירים לקוחים מקבצי שקיפות המחירים שהרשתות מפרסמות לפי חוק. מחיר בקופה עשוי להשתנות, במיוחד במוצרים במשקל ובמבצעים מורכבים.</p>
+    </section>
+  </section>
+
+  <!-- ============ PASTE ============ -->
+  <section id="view-paste" class="view" aria-labelledby="h-paste" hidden>
+    <div class="card">
+      <h2 id="h-paste">הדבקת רשימת קניות</h2>
+      <p class="hint" id="pasteHint">הדבק רשימה מוואטסאפ, מהפתקים או מכל מקום. שורה או פסיק לכל מוצר. אפשר לכתוב כמות: "2 לחם", "חלב x3", "עגבניות 1.5 קג".</p>
+      <label for="pasteText" class="sr-only">רשימת קניות</label>
+      <textarea id="pasteText" rows="8" aria-describedby="pasteHint" placeholder="חלב 3%&#10;2 לחם אחיד&#10;ביצים L&#10;עגבניות 1 קג&#10;קוטג'"></textarea>
+      <div class="row-end"><button type="button" class="btn primary" id="parseBtn">זהה מוצרים</button></div>
+    </div>
+    <div class="card" id="parsedCard" hidden>
+      <h3>בדוק שזיהיתי נכון</h3>
+      <p class="hint">לכל שורה בחר את המוצר המתאים. שורות שלא זוהו לא יתווספו.</p>
+      <ol id="parsedList" class="parsed"></ol>
+      <div class="row-end"><button type="button" class="btn primary big" id="addParsed">הוסף לסל</button></div>
+    </div>
+  </section>
+
+  <!-- ============ WATCH ============ -->
+  <section id="view-watch" class="view" aria-labelledby="h-watch" hidden>
+    <div class="card">
+      <div class="row-between">
+        <h2 id="h-watch">התראות ירידת מחיר</h2>
+        <button type="button" class="btn ghost" id="markSeen">סמן הכל כנקרא</button>
+      </div>
+      <ul id="alertList" class="plain"></ul>
+    </div>
+    <div class="card">
+      <h2>מוצרים במעקב</h2>
+      <p class="hint">בכל מוצר בסל לחץ על "היסטוריית מחיר ומעקב" וסמן "התרע לי כשהמחיר יורד". בכל פעם שתפתח את האתר אבדוק אם המחיר ירד. המעקב נשמר במכשיר הזה.</p>
+      <ul id="watchList" class="plain"></ul>
+    </div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section id="view-settings" class="view" aria-labelledby="h-settings" hidden>
+    <div class="card local-only">
+      <h2 id="h-settings">האזור שלי</h2>
+      <fieldset>
+        <legend>באילו ערים לחפש סניפים?</legend>
+        <div id="cityChecks" class="checks"></div>
+      </fieldset>
+      <p class="hint">הוספת ערים גדולות (כמו אשדוד) מגדילה את מספר הסניפים ואת זמן העדכון.</p>
+      <label class="switch"><input type="checkbox" id="clubDefault"><span>לכלול מבצעי מועדון כברירת מחדל</span></label>
+      <div class="row-end"><button type="button" class="btn primary" id="saveSettings">שמור ועדכן מחירים</button></div>
+    </div>
+    <div class="card public-only" hidden>
+      <h2 id="h-settings-pub">על המחירים</h2>
+      <p id="pubInfo"></p>
+      <p class="hint">את האזור ואת תדירות העדכון משנים מהמחשב שמריץ את סל חכם. הסלים השמורים והמעקב נשמרים בכל מכשיר בנפרד; כדי להעביר סל בין מכשירים, השתמש בכפתור "שתף סל".</p>
+    </div>
+    <div class="card local-only">
+      <div class="row-between">
+        <h2>עדכון מחירים</h2>
+        <button type="button" class="btn ghost" id="updateNow">עדכן עכשיו</button>
+      </div>
+      <p id="updateStatus" role="status" aria-live="polite"></p>
+      <p id="publishStatus"></p>
+      <details><summary>יומן עדכון</summary><pre id="logBox" class="log" tabindex="0"></pre></details>
+    </div>
+    <div class="card">
+      <h2>הסניפים באזור שלך</h2>
+      <ul id="storeInfo" class="plain"></ul>
+    </div>
+  </section>
+</main>
+
+<!-- dialogs -->
+<dialog id="productDialog" aria-labelledby="pdTitle">
+  <form method="dialog" class="dlg-head">
+    <h2 id="pdTitle">מוצר</h2>
+    <button class="icon-btn" aria-label="סגור">✕</button>
+  </form>
+  <div id="pdBody"></div>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
